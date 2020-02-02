@@ -1,7 +1,16 @@
+require('./config/config');
+
 const express = require('express');
+const mongoose = require('mongoose');
+
 const app = express();
 const bodyParser = require('body-parser');
-require('./config/config');
+
+const config = {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useUnifiedTopology: true
+};
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -9,35 +18,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
 
-app.get('/usuario', function(req, res) {
-    res.json('get Usuario');
-});
+app.use(require('./routes/usuarios'));
 
-app.post('/usuario', function(req, res) {
-    let body = req.body;
+mongoose.connect(process.env.URLDB, config,
+    (err) => {
+        if (err) throw err;
+        console.log('Base de Datos ONLINE!!');
+    });
 
-    if (body.nombre === undefined) {
-        res.status(400).json({
-            ok: false,
-            mensaje: 'El nombre es obligatorio'
-        });
-    } else {
-        res.status(201).json({
-            usuario: body
-        });
-    }
-
-});
-
-app.put('/usuario/:id', function(req, res) {
-    let id = req.params.id;
-    res.json({ id });
-});
-
-app.delete('/usuario', function(req, res) {
-    res.json('delete Usuario');
-});
 
 app.listen(process.env.PORT, () => {
     console.log("Escuchando el puerto 3000");
-})
+});
